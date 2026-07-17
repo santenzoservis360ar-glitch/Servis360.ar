@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Servis360ar</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a1628; --blue-mid:#1a3a6b; --blue-bright:#1e7fd4;
+  --blue-electric:#2fa8ff; --white:#ffffff; --gray-text:#8099bb;
+  --green:#1db954; --red:#e74c3c; --gold:#f5c842;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html, body{height:100%;overflow:hidden;}
+body{font-family:'Barlow',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
+#loginScreen{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#adminPanel{height:100%;overflow:hidden;}
+.admin-layout{height:calc(100vh - 57px);overflow:hidden;}
+.admin-main{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.sidebar{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(46,168,255,.12),transparent 70%);}
+.login-box{background:rgba(255,255,255,.04);border:1px solid rgba(46,168,255,.25);border-radius:24px;padding:52px 44px;width:100%;max-width:420px;text-align:center;}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;margin-bottom:4px;}
+.login-logo span{color:var(--blue-electric);}
+.login-sub{font-size:.82rem;color:var(--gray-text);margin-bottom:32px;}
+.login-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:var(--white);font-family:'Barlow',sans-serif;font-size:1rem;padding:14px 18px;outline:none;margin-bottom:14px;}
+.login-input:focus{border-color:var(--blue-electric);}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--blue-bright),var(--blue-electric));border:none;border-radius:12px;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;padding:14px;cursor:pointer;}
+.login-error{color:var(--red);font-size:.82rem;margin-top:10px;display:none;}
+#adminPanel{display:none;}
+.topbar{background:rgba(10,22,40,.95);border-bottom:1px solid rgba(46,168,255,.15);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(14px);}
+.topbar-logo{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;}
+.topbar-logo span{color:var(--blue-electric);}
+.admin-badge{background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:100px;padding:4px 14px;font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+.logout-btn{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:8px;color:var(--red);font-family:'Barlow',sans-serif;font-size:.82rem;font-weight:600;padding:7px 16px;cursor:pointer;}
+.admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 57px);}
+.sidebar{background:rgba(255,255,255,.02);border-right:1px solid rgba(255,255,255,.06);padding:24px 0;}
+.sidebar-section{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray-text);padding:0 20px;margin:20px 0 8px;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.6);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;border-left:3px solid transparent;}
+.sidebar-item:hover{color:var(--white);background:rgba(255,255,255,.04);}
+.sidebar-item.active{color:var(--blue-electric);background:rgba(46,168,255,.08);border-left-color:var(--blue-electric);}
+.admin-main{padding:32px;overflow-y:auto;}
+.admin-page{display:none;}
+.admin-page.active{display:block;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;margin-bottom:4px;}
+.page-sub{color:var(--gray-text);font-size:.88rem;font-weight:300;margin-bottom:28px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:32px;}
+.stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px;}
+.stat-card-num{font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:800;color:var(--blue-electric);}
+.stat-card-label{font-size:.78rem;color:var(--gray-text);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+.stat-card-change{font-size:.75rem;color:var(--green);margin-top:6px;}
+.admin-table-wrap{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-bottom:24px;}
+.admin-table-header{padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.admin-table-header h3{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;}
+.admin-search{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--white);font-family:'Barlow',sans-serif;font-size:.85rem;padding:8px 14px;outline:none;width:220px;}
+.admin-search::placeholder{color:var(--gray-text);}
+table{width:100%;border-collapse:collapse;}
+th{font-size:.7rem;color:var(--gray-text);text-transform:uppercase;letter-spacing:1px;padding:12px 22px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);}
+td{padding:14px 22px;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;font-size:.68rem;padding:3px 10px;border-radius:6px;font-weight:700;letter-spacing:.5px;}
+.badge-green{background:rgba(29,185,84,.12);color:#6ee09a;border:1px solid rgba(29,185,84,.25);}
+.badge-yellow{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.25);}
+.badge-red{background:rgba(231,76,60,.1);color:#f1948a;border:1px solid rgba(231,76,60,.25);}
+.badge-blue{background:rgba(46,168,255,.1);color:var(--blue-electric);border:1px solid rgba(46,168,255,.25);}
+.action-btn{background:none;border:1px solid rgba(255,255,255,.12);border-radius:6px;color:var(--gray-text);font-size:.75rem;padding:5px 12px;cursor:pointer;transition:all .2s;margin-right:4px;}
+.action-btn:hover{border-color:var(--blue-electric);color:var(--blue-electric);}
+.action-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.action-btn.success:hover{border-color:var(--green);color:var(--green);}
+/* FICHAS */
+.fichas-container{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.ficha-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;}
+.ficha-card:hover{border-color:rgba(46,168,255,.3);}
+.ficha-header{display:flex;align-items:center;gap:16px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);flex-wrap:wrap;}
+.ficha-avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1a3a6b,#1e7fd4);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:800;flex-shrink:0;}
+.ficha-nombre{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;}
+.ficha-rubro{font-size:.8rem;color:var(--gray-text);margin-top:3px;}
+.ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.ficha-item{display:flex;flex-direction:column;gap:4px;padding:12px 22px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.86rem;}
+.ficha-full{grid-column:1/-1;}
+.ficha-label{font-size:.68rem;font-weight:700;color:var(--gray-text);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;}
+.nota-interna{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--white);font-family:'Barlow',sans-serif;font-size:.84rem;padding:9px 12px;outline:none;resize:vertical;min-height:60px;margin-top:4px;}
+.nota-interna:focus{border-color:var(--blue-electric);}
+.ficha-actions{display:flex;gap:8px;padding:14px 22px;border-top:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.01);}
+.split-bar{display:flex;border-radius:10px;overflow:hidden;height:14px;margin:10px 0;}
+.split-bar-pro{background:linear-gradient(90deg,#1db954,#15a045);flex:88;}
+.split-bar-admin{background:linear-gradient(90deg,#1e7fd4,#2fa8ff);flex:12;}
+.admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.admin-form-group{margin-bottom:16px;}
+.admin-form-label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--gray-text);margin-bottom:7px;}
+.admin-form-input,.admin-form-select,.admin-form-textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--white);font-family:'Barlow',sans-serif;font-size:.92rem;padding:11px 15px;outline:none;}
+.admin-form-input:focus,.admin-form-select:focus,.admin-form-textarea:focus{border-color:var(--blue-electric);}
+.admin-form-select option{background:#0a1628;}
+.admin-form-textarea{resize:vertical;min-height:90px;}
+.admin-submit{background:linear-gradient(135deg,var(--blue-bright),var(--blue-electric));border:none;border-radius:10px;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;padding:12px 28px;cursor:pointer;}
+.admin-alert{background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.25);border-radius:10px;padding:12px 16px;font-size:.85rem;color:#6ee09a;margin-bottom:16px;display:none;}
+.admin-alert.show{display:block;}
+@media(max-width:768px){.admin-layout{grid-template-columns:1fr;}.sidebar{display:none;}.admin-form-grid{grid-template-columns:1fr;}.ficha-grid{grid-template-columns:1fr;}} .mobile-nav{display:none;} @media(max-width:768px){.mobile-nav{display:flex;overflow-x:auto;gap:8px;padding:12px 16px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.06);scrollbar-width:none;} .mobile-nav::-webkit-scrollbar{display:none;} .mobile-nav-btn{flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:20px;color:rgba(255,255,255,.7);font-family:Barlow,sans-serif;font-size:.78rem;padding:7px 14px;cursor:pointer;white-space:nowrap;} .mobile-nav-btn.active{background:rgba(46,168,255,.15);border-color:var(--blue-electric);color:var(--blue-electric);}}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">SERVIS<span>360</span>AR</div>
+    <div class="login-sub">Panel de Administración — Acceso Restringido</div>
+    <div style="position:relative;margin-bottom:14px;">
+      <input class="login-input" type="password" id="loginCode" placeholder="Ingresá el código de acceso" onkeydown="if(event.key==='Enter')doLogin()" style="margin-bottom:0;padding-right:50px;">
+      <button onclick="togglePassAdmin()" type="button" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-text);font-size:1.1rem;padding:0;line-height:1;" id="eyeBtnAdmin">👁️</button>
+    </div>
+    <button class="login-btn" onclick="doLogin()">🔐 Ingresar al Panel</button>
+    <div class="login-error" id="loginError">❌ Código incorrecto. Acceso denegado.</div>
+  </div>
+</div>
+
+<div id="adminPanel">
+  <div class="topbar">
+    <div class="topbar-logo">SERVIS<span>360</span>AR</div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="admin-badge">⚙️ Administrador</span>
+      <a href="index.html" style="background:rgba(46,168,255,.1);border:1px solid rgba(46,168,255,.3);border-radius:8px;color:var(--blue-electric);font-family:'Barlow',sans-serif;font-size:.82rem;font-weight:600;padding:7px 16px;text-decoration:none;">← Sitio</a>
+      <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- MENÚ MÓVIL -->
+  <div class="mobile-nav">
+    <button class="mobile-nav-btn active" onclick="showPageMobile('dashboard',this)">📊 Dashboard</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('registros',this)">📋 Registros</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('profesionales',this)">🔧 Profesionales</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('comerciantes',this)">🏪 Comerciantes</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('pagos',this)">💳 Pagos</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('comisiones',this)">📈 Comisiones</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('arrepentimientos',this)">↩️ Arrepentimientos</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('reclamos',this)">⚠️ Reclamos</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('opiniones',this)">⭐ Opiniones</button>
+    <button class="mobile-nav-btn" onclick="showPageMobile('agregar',this)">➕ Agregar</button>
+  </div>
+
+  <div class="admin-layout">
+    <div class="sidebar">
+      <div class="sidebar-section">General</div>
+      <div class="sidebar-item active" onclick="showPage('dashboard',this)"><span>📊</span> Dashboard</div>
+      <div class="sidebar-item" onclick="showPage('registros',this)"><span>📋</span> Registros</div>
+      <div class="sidebar-item" onclick="showPage('profesionales',this)"><span>🔧</span> Profesionales</div>
+      <div class="sidebar-item" onclick="showPage('comerciantes',this)"><span>🏪</span> Comerciantes</div>
+      <div class="sidebar-section">Finanzas</div>
+      <div class="sidebar-item" onclick="showPage('pagos',this)"><span>💳</span> Pagos & Split</div>
+      <div class="sidebar-item" onclick="showPage('comisiones',this)"><span>📈</span> Comisiones</div>
+      <div class="sidebar-item" onclick="showPage('arrepentimientos',this)"><span>↩️</span> Arrepentimientos</div>
+      <div class="sidebar-section">Gestión</div>
+      <div class="sidebar-item" onclick="showPage('reclamos',this)"><span>⚠️</span> Reclamos</div>
+      <div class="sidebar-item" onclick="showPage('opiniones',this)"><span>⭐</span> Opiniones</div>
+      <div class="sidebar-item" onclick="showPage('agregar',this)"><span>➕</span> Agregar registro</div>
+    </div>
+
+    <div class="admin-main">
+
+      <!-- DASHBOARD -->
+      <div class="admin-page active" id="page-dashboard">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Resumen general de la plataforma</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-num" id="stat-profesionales">—</div><div class="stat-card-label">Profesionales activos</div><div class="stat-card-change">En tiempo real</div></div>
+          <div class="stat-card"><div class="stat-card-num" id="stat-comercios">—</div><div class="stat-card-label">Comercios activos</div><div class="stat-card-change">En tiempo real</div></div>
+          <div class="stat-card"><div class="stat-card-num">—</div><div class="stat-card-label">Servicios realizados</div><div class="stat-card-change">Próximamente</div></div>
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--green)" id="stat-comision-mes">—</div><div class="stat-card-label">Comisiones cobradas</div><div class="stat-card-change">Mes actual</div></div>
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--gold)" id="stat-reclamos">—</div><div class="stat-card-label">Reclamos abiertos</div><div class="stat-card-change" style="color:var(--gold)">Requieren atención</div></div>
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--red)">—</div><div class="stat-card-label">Arrepentimientos</div><div class="stat-card-change" style="color:var(--gray-text)">Este mes</div></div>
+        </div>
+        <div class="admin-table-wrap" style="padding:24px;margin-bottom:24px">
+          <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:16px">✂️ Split de pagos — Último mes</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px">
+            <div style="background:rgba(29,185,84,.08);border:1px solid rgba(29,185,84,.2);border-radius:12px;padding:16px">
+              <div style="font-size:.7rem;color:var(--gray-text);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Profesionales/Comercios (88%)</div>
+              <div id="split-pro" style="font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:800;color:#6ee09a">—</div>
+            </div>
+            <div style="background:rgba(46,168,255,.08);border:1px solid rgba(46,168,255,.2);border-radius:12px;padding:16px">
+              <div style="font-size:.7rem;color:var(--gray-text);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Administración Servis360ar (12%)</div>
+              <div id="split-admin" style="font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:800;color:var(--blue-electric)">—</div>
+            </div>
+          </div>
+          <div class="split-bar"></div>
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--gray-text);margin-top:6px"><span>🟢 Profesionales/Comercios 88%</span><span>🔵 Administración 12%</span></div>
+        </div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Últimos registros</h3></div>
+          <table><thead><tr><th>Nombre</th><th>Tipo</th><th>Rubro</th><th>Fecha</th><th>Estado</th></tr></thead>
+          <tbody id="tbody-dashboard"><tr><td colspan="5" style="text-align:center;color:var(--gray-text);padding:24px">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- REGISTROS -->
+      <div class="admin-page" id="page-registros">
+        <div class="page-title">Todos los Registros</div>
+        <div class="page-sub">Profesionales y comercios registrados en la plataforma</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Registros completos</h3><input class="admin-search" placeholder="🔍 Buscar..." oninput="filterTable(this,'t-registros')"></div>
+          <table id="t-registros"><thead><tr><th>Nombre</th><th>Tipo</th><th>Rubro</th><th>Teléfono</th><th>Email</th><th>Cuenta cobro</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-registros"><tr><td colspan="8" style="text-align:center;color:var(--gray-text);padding:24px">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- PROFESIONALES - FICHAS COMPLETAS -->
+      <div class="admin-page" id="page-profesionales">
+        <div class="page-title">Profesionales</div>
+        <div class="page-sub">Ficha completa de cada prestador — todos los datos visibles</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Profesionales registrados</h3><input class="admin-search" placeholder="🔍 Buscar..." oninput="filterFichas(this,'fichas-pro')"></div>
+          <div class="fichas-container" id="fichas-pro">
+            <div style="padding:24px;color:var(--gray-text);text-align:center">Cargando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMERCIANTES - FICHAS COMPLETAS -->
+      <div class="admin-page" id="page-comerciantes">
+        <div class="page-title">Comerciantes</div>
+        <div class="page-sub">Ficha completa de cada comercio — todos los datos visibles</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Comercios registrados</h3><input class="admin-search" placeholder="🔍 Buscar..." oninput="filterFichas(this,'fichas-com')"></div>
+          <div class="fichas-container" id="fichas-com">
+            <div style="padding:24px;color:var(--gray-text);text-align:center">Cargando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGOS -->
+      <div class="admin-page" id="page-pagos">
+        <div class="page-title">Pagos & Split</div>
+        <div class="page-sub">Historial de pagos con división automática 88% / 12%</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Historial de pagos</h3></div>
+          <table><thead><tr><th>Fecha</th><th>Servicio</th><th>Total</th><th>→ Profesional (88%)</th><th>→ Admin (12%)</th><th>Estado</th></tr></thead>
+          <tbody id="tbody-pagos"><tr><td colspan="6" style="text-align:center;color:var(--gray-text);padding:24px">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- COMISIONES -->
+      <div class="admin-page" id="page-comisiones">
+        <div class="page-title">Comisiones</div>
+        <div class="page-sub">Ingresos de la administración (12% por operación)</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--green)">$84.600</div><div class="stat-card-label">Mayo 2026</div></div>
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--green)">$71.200</div><div class="stat-card-label">Abril 2026</div></div>
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--green)">$63.800</div><div class="stat-card-label">Marzo 2026</div></div>
+          <div class="stat-card"><div class="stat-card-num" style="color:var(--blue-electric)">$219.600</div><div class="stat-card-label">Total trimestre</div></div>
+        </div>
+      </div>
+
+      <!-- ARREPENTIMIENTOS -->
+      <div class="admin-page" id="page-arrepentimientos">
+        <div class="page-title">Arrepentimientos</div>
+        <div class="page-sub">Art. 34 — Ley 24.240 · Plazo: 10 días hábiles</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Solicitudes recibidas</h3></div>
+          <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Monto</th><th>Días restantes</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            <tr><td>20/05/2026</td><td>Lucía Fernández</td><td>Limpieza — María L.</td><td>$8.500</td><td style="color:var(--gold)">6 días</td><td><span class="badge badge-yellow">En proceso</span></td><td><button class="action-btn success">Reembolsar</button><button class="action-btn danger">Rechazar</button></td></tr>
+            <tr><td>18/05/2026</td><td>Martín Sosa</td><td>Verdulería Don Jorge</td><td>$3.200</td><td style="color:var(--green)">4 días</td><td><span class="badge badge-blue">En revisión</span></td><td><button class="action-btn success">Reembolsar</button><button class="action-btn danger">Rechazar</button></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- RECLAMOS -->
+      <div class="admin-page" id="page-reclamos">
+        <div class="page-title">Reclamos</div>
+        <div class="page-sub">El profesional tiene 24 hs para responder</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Reclamos activos</h3></div>
+          <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Contra</th><th>Motivo</th><th>Hs transcurridas</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-reclamos"><tr><td colspan="7" style="text-align:center;color:var(--gray-text);padding:24px">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- OPINIONES -->
+      <div class="admin-page" id="page-opiniones">
+        <div class="page-title">Opiniones</div>
+        <div class="page-sub">Todas las reseñas publicadas en la plataforma</div>
+        <div class="admin-table-wrap">
+          <div class="admin-table-header"><h3>Reseñas publicadas</h3></div>
+          <table><thead><tr><th>Autor</th><th>Sobre</th><th>Calificación</th><th>Comentario</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-opiniones"><tr><td colspan="6" style="text-align:center;color:var(--gray-text);padding:24px">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- AGREGAR -->
+      <div class="admin-page" id="page-agregar">
+        <div class="page-title">Agregar Registro Manual</div>
+        <div class="page-sub">Cargá manualmente un profesional o comercio verificado</div>
+        <div class="admin-alert" id="alertAgregar">✅ Registro agregado correctamente.</div>
+        <div class="admin-table-wrap" style="padding:28px">
+          <div class="admin-form-grid">
+            <div class="admin-form-group"><label class="admin-form-label">Tipo de registro</label><select class="admin-form-select" id="ag-tipo"><option>Profesional</option><option>Comercio</option></select></div>
+            <div class="admin-form-group"><label class="admin-form-label">Estado inicial</label><select class="admin-form-select" id="ag-estado"><option>Activo</option><option>Pendiente</option><option>En revisión</option></select></div>
+            <div class="admin-form-group"><label class="admin-form-label">Nombre / Comercio</label><input class="admin-form-input" id="ag-nombre" type="text" placeholder="Nombre completo o razón social"></div>
+            <div class="admin-form-group"><label class="admin-form-label">Rubro</label><input class="admin-form-input" id="ag-rubro" type="text" placeholder="Ej: Plomería, Verdulería..."></div>
+            <div class="admin-form-group"><label class="admin-form-label">Email</label><input class="admin-form-input" id="ag-email" type="email" placeholder="correo@email.com"></div>
+            <div class="admin-form-group"><label class="admin-form-label">Teléfono</label><input class="admin-form-input" id="ag-tel" type="tel" placeholder="+54 9 ..."></div>
+            <div class="admin-form-group"><label class="admin-form-label">Dirección</label><input class="admin-form-input" id="ag-dir" type="text" placeholder="Calle, número, ciudad"></div>
+            <div class="admin-form-group"><label class="admin-form-label">Cuenta de cobro</label><input class="admin-form-input" id="ag-cuenta" type="text" placeholder="MP / CBU / Alias"></div>
+          </div>
+          <div class="admin-form-group"><label class="admin-form-label">Notas internas</label><textarea class="admin-form-textarea" id="ag-nota" placeholder="Observaciones solo para la administración..."></textarea></div>
+          <button class="admin-submit" onclick="window.agregarRegistroFirebase()">➕ Agregar registro</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const CODIGO='et162163';
+
+function togglePassAdmin() {
+  const input = document.getElementById('loginCode');
+  const btn = document.getElementById('eyeBtnAdmin');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+function doLogin(){
+  if(document.getElementById('loginCode').value===CODIGO){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+  } else {
+    const e=document.getElementById('loginError');
+    e.style.display='block';
+    document.getElementById('loginCode').value='';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+function doLogout(){
+  if(confirm('¿Cerrar sesión?')){
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('loginCode').value='';
+  }
+}
+function showPageMobile(id,el){
+  document.querySelectorAll('.admin-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function showPage(id,el){
+  document.querySelectorAll('.admin-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+}
+function filterTable(input,tableId){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll('#'+tableId+' tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none');
+}
+function filterFichas(input,containerId){
+  const q=input.value.toLowerCase();
+  document.querySelectorAll('#'+containerId+' .ficha-card').forEach(c=>c.style.display=c.textContent.toLowerCase().includes(q)?'':'none');
+}
+function eliminarFila(btn){if(confirm('¿Eliminar este registro?'))btn.closest('tr').remove();}
+function aprobarFila(btn){
+  btn.closest('tr').querySelector('.badge').className='badge badge-green';
+  btn.closest('tr').querySelector('.badge').textContent='Activo';
+  btn.closest('td').innerHTML='<button class="action-btn danger" onclick="eliminarFila(this)">Eliminar</button>';
+}
+function eliminarFicha(btn){if(confirm('¿Eliminar este registro?'))btn.closest('.ficha-card').remove();}
+function suspenderFicha(btn){
+  const b=btn.closest('.ficha-card').querySelector('.badge');
+  if(b.textContent==='Activo'){b.className='badge badge-red';b.textContent='Suspendido';btn.textContent='▶ Reactivar';}
+  else{b.className='badge badge-green';b.textContent='Activo';btn.textContent='⏸ Suspender';}
+}
+function aprobarFicha(btn){
+  const b=btn.closest('.ficha-card').querySelector('.badge');
+  b.className='badge badge-green';b.textContent='Activo';
+  btn.closest('.ficha-actions').innerHTML='<button class="action-btn danger" onclick="suspenderFicha(this)">⏸ Suspender</button><button class="action-btn danger" onclick="eliminarFicha(this)">🗑 Eliminar</button>';
+}
+function agregarRegistro(){
+  const a=document.getElementById('alertAgregar');
+  a.classList.add('show');
+  setTimeout(()=>a.classList.remove('show'),3000);
+}
+</script>
+<script>
+// Prevenir swipe hacia atrás / pull-to-refresh en móvil
+document.addEventListener('touchstart', function(e) {
+  window._touchStartX = e.touches[0].clientX;
+  window._touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchmove', function(e) {
+  const dx = e.touches[0].clientX - window._touchStartX;
+  const dy = e.touches[0].clientY - window._touchStartY;
+  // Bloquear swipe horizontal (navegación atrás/adelante)
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+// Bloquear pull-to-refresh
+document.addEventListener('touchmove', function(e) {
+  if (e.touches.length === 1) {
+    const scrollable = e.target.closest('.admin-main, .sidebar, #loginScreen');
+    if (!scrollable) {
+      e.preventDefault();
+    }
+  }
+}, { passive: false });
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAVnLXg9XhDycy6oV7Gjo8slIR6OlUBAeE",
+  authDomain: "service360ar.firebaseapp.com",
+  projectId: "service360ar",
+  storageBucket: "service360ar.firebasestorage.app",
+  messagingSenderId: "69375455720",
+  appId: "1:69375455720:web:9071cc25f70f62ed00b45d",
+  measurementId: "G-EFH0GXYSHR"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── CARGAR DATOS EN TIEMPO REAL ──
+
+// USUARIOS (profesionales + comerciantes)
+onSnapshot(query(collection(db, 'usuarios'), orderBy('fechaRegistro', 'desc')), snap => {
+  const todos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const profesionales = todos.filter(u => u.rol === 'profesional');
+  const comerciantes  = todos.filter(u => u.rol === 'comerciante');
+
+  // Stats dashboard
+  const el = id => document.getElementById(id);
+  if (el('stat-profesionales')) el('stat-profesionales').textContent = profesionales.filter(u => u.estado === 'activo').length;
+  if (el('stat-comercios'))     el('stat-comercios').textContent     = comerciantes.filter(u => u.estado === 'activo').length;
+
+  // Tabla últimos registros dashboard
+  const tbodyDash = document.getElementById('tbody-dashboard');
+  if (tbodyDash) {
+    tbodyDash.innerHTML = '';
+    todos.slice(0, 10).forEach(u => {
+      const fecha = u.fechaRegistro?.toDate ? u.fechaRegistro.toDate().toLocaleDateString('es-AR') : '—';
+      const badgeClass = u.estado === 'activo' ? 'badge-green' : u.estado === 'pendiente' ? 'badge-yellow' : 'badge-blue';
+      const badgeText  = u.estado === 'activo' ? 'Verificado' : u.estado === 'pendiente' ? 'Pendiente' : 'En revisión';
+      tbodyDash.innerHTML += `<tr>
+        <td>${u.nombre || u.nombreComercio || '—'}</td>
+        <td>${u.rol === 'profesional' ? 'Profesional' : 'Comercio'}</td>
+        <td>${u.especialidad || u.rubro || '—'}</td>
+        <td>${fecha}</td>
+        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+      </tr>`;
+    });
+    if (todos.length === 0) tbodyDash.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray-text);padding:24px">Sin registros aún</td></tr>';
+  }
+
+  // Tabla registros completos
+  const tbodyReg = document.getElementById('tbody-registros');
+  if (tbodyReg) {
+    tbodyReg.innerHTML = '';
+    todos.forEach(u => {
+      const badgeClass = u.estado === 'activo' ? 'badge-green' : u.estado === 'pendiente' ? 'badge-yellow' : 'badge-blue';
+      const badgeText  = u.estado === 'activo' ? 'Activo' : u.estado === 'pendiente' ? 'Pendiente' : 'En revisión';
+      const acciones = u.estado === 'pendiente'
+        ? `<button class="action-btn success" onclick="window.aprobarUsuario('${u.id}')">Aprobar</button><button class="action-btn danger" onclick="window.eliminarUsuario('${u.id}')">Rechazar</button>`
+        : `<button class="action-btn danger" onclick="window.eliminarUsuario('${u.id}')">Eliminar</button>`;
+      tbodyReg.innerHTML += `<tr>
+        <td>${u.nombre || u.nombreComercio || '—'}</td>
+        <td>${u.rol === 'profesional' ? 'Profesional' : 'Comercio'}</td>
+        <td>${u.especialidad || u.rubro || '—'}</td>
+        <td>${u.telefono || '—'}</td>
+        <td>${u.email || '—'}</td>
+        <td>${u.cuentaCobro || u.aliasMp || '—'}</td>
+        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+        <td>${acciones}</td>
+      </tr>`;
+    });
+    if (todos.length === 0) tbodyReg.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray-text);padding:24px">Sin registros aún</td></tr>';
+  }
+
+  // Fichas profesionales
+  const fichasPro = document.getElementById('fichas-pro');
+  if (fichasPro) {
+    fichasPro.innerHTML = '';
+    if (profesionales.length === 0) {
+      fichasPro.innerHTML = '<div style="padding:24px;color:var(--gray-text);text-align:center">Sin profesionales registrados aún</div>';
+    }
+    profesionales.forEach(u => renderFicha(fichasPro, u));
+  }
+
+  // Fichas comerciantes
+  const fichasCom = document.getElementById('fichas-com');
+  if (fichasCom) {
+    fichasCom.innerHTML = '';
+    if (comerciantes.length === 0) {
+      fichasCom.innerHTML = '<div style="padding:24px;color:var(--gray-text);text-align:center">Sin comercios registrados aún</div>';
+    }
+    comerciantes.forEach(u => renderFicha(fichasCom, u));
+  }
+});
+
+// RESEÑAS
+onSnapshot(query(collection(db, 'reseñas'), orderBy('fecha', 'desc')), snap => {
+  const tbody = document.getElementById('tbody-opiniones');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  snap.docs.forEach(d => {
+    const r = d.data();
+    const fecha = r.fecha?.toDate ? r.fecha.toDate().toLocaleDateString('es-AR') : '—';
+    const stars = '⭐'.repeat(Math.round(r.calificacion || 0));
+    tbody.innerHTML += `<tr>
+      <td>${r.autor || '—'}</td>
+      <td>${r.sobre || '—'}</td>
+      <td>${stars}</td>
+      <td>${r.comentario || '—'}</td>
+      <td>${fecha}</td>
+      <td><button class="action-btn danger" onclick="window.eliminarResena('${d.id}')">Eliminar</button></td>
+    </tr>`;
+  });
+  if (snap.empty) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray-text);padding:24px">Sin reseñas aún</td></tr>';
+});
+
+// RECLAMOS
+onSnapshot(query(collection(db, 'reclamos'), orderBy('fecha', 'desc')), snap => {
+  const tbody = document.getElementById('tbody-reclamos');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  snap.docs.forEach(d => {
+    const r = d.data();
+    const fecha = r.fecha?.toDate ? r.fecha.toDate().toLocaleDateString('es-AR') : '—';
+    const hs = r.fecha?.toDate ? Math.floor((Date.now() - r.fecha.toDate()) / 3600000) : '—';
+    const hsColor = hs > 24 ? 'var(--red)' : hs > 18 ? 'var(--gold)' : 'var(--gray-text)';
+    const estadoBadge = r.estado === 'resuelto' ? 'badge-green' : r.estado === 'vencido' ? 'badge-red' : 'badge-yellow';
+    tbody.innerHTML += `<tr>
+      <td>${fecha}</td>
+      <td>${r.cliente || '—'}</td>
+      <td>${r.contra || '—'}</td>
+      <td>${r.motivo || '—'}</td>
+      <td style="color:${hsColor}">${hs} hs${hs > 24 ? ' ⚠️' : ''}</td>
+      <td><span class="badge ${estadoBadge}">${r.estado || 'Abierto'}</span></td>
+      <td>
+        <button class="action-btn" onclick="window.resolverReclamo('${d.id}')">Resolver</button>
+        <button class="action-btn danger" onclick="window.suspenderPorReclamo('${r.contraId}')">Suspender</button>
+      </td>
+    </tr>`;
+  });
+  if (snap.empty) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray-text);padding:24px">Sin reclamos aún</td></tr>';
+
+  const el = document.getElementById('stat-reclamos');
+  if (el) el.textContent = snap.docs.filter(d => d.data().estado !== 'resuelto').length;
+});
+
+// PAGOS
+onSnapshot(query(collection(db, 'pagos'), orderBy('fecha', 'desc')), snap => {
+  const tbody = document.getElementById('tbody-pagos');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  let totalAdmin = 0;
+  snap.docs.forEach(d => {
+    const p = d.data();
+    const fecha = p.fecha?.toDate ? p.fecha.toDate().toLocaleDateString('es-AR') : '—';
+    const admin88 = Math.round((p.monto || 0) * 0.88);
+    const admin12 = Math.round((p.monto || 0) * 0.12);
+    totalAdmin += admin12;
+    const badgeClass = p.estado === 'acreditado' ? 'badge-green' : 'badge-yellow';
+    tbody.innerHTML += `<tr>
+      <td>${fecha}</td>
+      <td>${p.servicio || '—'}</td>
+      <td>$${(p.monto || 0).toLocaleString('es-AR')}</td>
+      <td style="color:#6ee09a">$${admin88.toLocaleString('es-AR')}</td>
+      <td style="color:var(--blue-electric)">$${admin12.toLocaleString('es-AR')}</td>
+      <td><span class="badge ${badgeClass}">${p.estado || 'Pendiente'}</span></td>
+    </tr>`;
+  });
+  if (snap.empty) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray-text);padding:24px">Sin pagos aún</td></tr>';
+
+  const elAdmin = document.getElementById('split-admin');
+  const elPro   = document.getElementById('split-pro');
+  if (elAdmin) elAdmin.textContent = '$' + totalAdmin.toLocaleString('es-AR');
+  if (elPro)   elPro.textContent   = '$' + Math.round(totalAdmin / 0.12 * 0.88).toLocaleString('es-AR');
+
+  const elCom = document.getElementById('stat-comision-mes');
+  if (elCom) elCom.textContent = '$' + totalAdmin.toLocaleString('es-AR');
+});
+
+// ── RENDER FICHA ──
+function renderFicha(container, u) {
+  const initials = (u.nombre || u.nombreComercio || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const badgeClass = u.estado === 'activo' ? 'badge-green' : u.estado === 'pendiente' ? 'badge-yellow' : 'badge-blue';
+  const badgeText  = u.estado === 'activo' ? 'Activo' : u.estado === 'pendiente' ? 'Pendiente' : 'En revisión';
+  const acciones = u.estado === 'pendiente'
+    ? `<button class="action-btn success" onclick="window.aprobarUsuario('${u.id}')">✅ Aprobar</button><button class="action-btn danger" onclick="window.eliminarUsuario('${u.id}')">🗑 Rechazar</button>`
+    : `<button class="action-btn danger" onclick="window.suspenderUsuario('${u.id}','${u.estado}')">${u.estado === 'suspendido' ? '▶ Reactivar' : '⏸ Suspender'}</button><button class="action-btn danger" onclick="window.eliminarUsuario('${u.id}')">🗑 Eliminar</button>`;
+
+  const div = document.createElement('div');
+  div.className = 'ficha-card';
+  div.innerHTML = `
+    <div class="ficha-header">
+      <div class="ficha-avatar">${initials}</div>
+      <div style="flex:1">
+        <div class="ficha-nombre">${u.nombre || u.nombreComercio || '—'}</div>
+        <div class="ficha-rubro">${u.especialidad || u.rubro || '—'}</div>
+      </div>
+      <span class="badge ${badgeClass}">${badgeText}</span>
+    </div>
+    <div class="ficha-grid">
+      <div class="ficha-item"><span class="ficha-label">📧 Email</span>${u.email || '—'}</div>
+      <div class="ficha-item"><span class="ficha-label">📱 Teléfono</span>${u.telefono || '—'}</div>
+      <div class="ficha-item"><span class="ficha-label">📍 Dirección</span>${u.direccion || '—'}</div>
+      <div class="ficha-item"><span class="ficha-label">💳 Cuenta cobro</span><span style="color:var(--blue-electric)">${u.cuentaCobro || u.aliasMp || '—'}</span></div>
+      ${u.descripcion ? `<div class="ficha-item ficha-full"><span class="ficha-label">📝 Descripción</span>${u.descripcion}</div>` : ''}
+      <div class="ficha-item ficha-full"><span class="ficha-label">🗒 Nota interna (solo admin)</span><textarea class="nota-interna" placeholder="Escribí una nota interna..." onchange="window.guardarNota('${u.id}', this.value)">${u.notaAdmin || ''}</textarea></div>
+    </div>
+    <div class="ficha-actions">${acciones}</div>`;
+  container.appendChild(div);
+}
+
+// ── ACCIONES GLOBALES ──
+window.aprobarUsuario = async (id) => {
+  if (!confirm('¿Aprobar este usuario?')) return;
+  await updateDoc(doc(db, 'usuarios', id), { estado: 'activo' });
+};
+window.eliminarUsuario = async (id) => {
+  if (!confirm('¿Eliminar este registro permanentemente?')) return;
+  await deleteDoc(doc(db, 'usuarios', id));
+};
+window.suspenderUsuario = async (id, estadoActual) => {
+  const nuevoEstado = estadoActual === 'suspendido' ? 'activo' : 'suspendido';
+  await updateDoc(doc(db, 'usuarios', id), { estado: nuevoEstado });
+};
+window.guardarNota = async (id, valor) => {
+  await updateDoc(doc(db, 'usuarios', id), { notaAdmin: valor });
+};
+window.eliminarResena = async (id) => {
+  if (!confirm('¿Eliminar esta reseña?')) return;
+  await deleteDoc(doc(db, 'reseñas', id));
+};
+window.resolverReclamo = async (id) => {
+  await updateDoc(doc(db, 'reclamos', id), { estado: 'resuelto' });
+};
+window.suspenderPorReclamo = async (uid) => {
+  if (!uid || !confirm('¿Suspender la cuenta del prestador?')) return;
+  await updateDoc(doc(db, 'usuarios', uid), { estado: 'suspendido' });
+};
+window.agregarRegistroFirebase = async () => {
+  const tipo  = document.getElementById('ag-tipo')?.value;
+  const estado= document.getElementById('ag-estado')?.value?.toLowerCase() || 'pendiente';
+  const nombre= document.getElementById('ag-nombre')?.value?.trim();
+  const rubro = document.getElementById('ag-rubro')?.value?.trim();
+  const email = document.getElementById('ag-email')?.value?.trim();
+  const tel   = document.getElementById('ag-tel')?.value?.trim();
+  const dir   = document.getElementById('ag-dir')?.value?.trim();
+  const cuenta= document.getElementById('ag-cuenta')?.value?.trim();
+  const nota  = document.getElementById('ag-nota')?.value?.trim();
+  if (!nombre) { alert('El nombre es obligatorio'); return; }
+  await addDoc(collection(db, 'usuarios'), {
+    rol: tipo === 'Profesional' ? 'profesional' : 'comerciante',
+    nombre, especialidad: rubro, email, telefono: tel,
+    direccion: dir, cuentaCobro: cuenta, notaAdmin: nota,
+    estado, fechaRegistro: serverTimestamp()
+  });
+  const a = document.getElementById('alertAgregar');
+  a.classList.add('show');
+  setTimeout(() => a.classList.remove('show'), 3000);
+};
+</script>
+</body>
+</html>
